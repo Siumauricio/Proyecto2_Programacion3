@@ -8,14 +8,44 @@ using namespace std;
 #include "ListaEnlazada.h"
 #include "nodo.h"
 using std::istringstream;
-void archivo::escribirArchivo(int fila, int columna,ListaEnlazada*ob,int n) {
-	ofstream materiasOut("c.dat", ios::app);
-	if (!materiasOut)
+void archivo::escribirDet(int fila, int columna, ListaEnlazada* ob, string nombre) {
+	ofstream lista(nombre, ios::app);
+	if (!lista)
+	{
+		cout << "Error al intentar abrir archivo materias.dat";
+		return;
+	}else{
+		lista << ob->obtenerNodo(0, 0)->numero;
+	}
+
+}
+void archivo::escribirArchivo(int fila, int columna,ListaEnlazada*ob,string nombre) {
+	ofstream lista(nombre, ios::app);
+	if (!lista)
 	{
 		cout << "Error al intentar abrir archivo materias.dat";
 		return;
 	}
-
+	for (int i = 0; i < fila; i++)
+	{
+		for (int j = 0; j< columna; j++)
+		{
+				if (ob->obtenerNodo(i, j)->NodoD() == nullptr)
+				{
+					lista << ob->obtenerNodo(i, j)->numero;
+					if ((i + 1) == fila)
+					{
+						break;
+					}
+					else {
+						lista << endl;
+					}
+				}
+				else {
+					lista << ob->obtenerNodo(i, j)->numero << " ";
+				}
+			}
+	}
 }
 void archivo::leerArchivo() {
 	string cadena;
