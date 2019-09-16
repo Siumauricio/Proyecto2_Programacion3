@@ -155,12 +155,28 @@ void ListaEnlazada::Suma(string nombre, string nombre2) {
 			for (int j = 0; j < archivo.obColumna(); j++)
 			{
 				int valor = lista->obtenerNodo(i, j)->numero + lista2->obtenerNodo(i, j)->numero;
-				cout << valor << " ";
+				Nodo* nodo = nullptr;
+				if (i == 0 && j == 0) {
+					nodo = resultado->raiz(valor);
+				}
+				else {
+					if ((j - 1) >= 0) {
+						nodo = resultado->agregarNodo(resultado->obtenerNodo(i, (j - 1)), 1, valor, i, j);
+					}
+					if ((i - 1) >= 0) {
+						nodo = resultado->agregarNodo(resultado->obtenerNodo((i - 1), j), 2, valor, i, j);
+					}
+				}
 			}
-			cout << endl;
 		}
-		cout << endl;
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirArchivo(archivo.obFila(), archivo.obColumna(), resultado, direccion);
 
+		cout << endl;
+	
 	}
 	else {
 		cout << "Lo Siento no son compatibles" << endl;
@@ -178,6 +194,7 @@ void ListaEnlazada::Resta(string nombre,string nombre2) {
 	}
 	ListaEnlazada* lista = archivo.matriz_1(nombre);
 	ListaEnlazada* lista2 = arch2.matriz_2(nombre2);
+	ListaEnlazada* resultado = new ListaEnlazada();
 	if (archivo.obColumna() == arch2.obColumna() && archivo.obFila() == arch2.obFila())
 	
 	{
@@ -193,10 +210,24 @@ void ListaEnlazada::Resta(string nombre,string nombre2) {
 		for (int j = 0; j < archivo.obColumna(); j++)
 		{
 			int valor = lista->obtenerNodo(i, j)->numero - lista2->obtenerNodo(i, j)->numero;
-			cout << valor << " ";
+			Nodo* nodo = nullptr;
+			if (i == 0 && j == 0) {
+				nodo = resultado->raiz(valor);
+			} else {
+				if ((j - 1) >= 0) {
+					nodo = resultado->agregarNodo(resultado->obtenerNodo(i, (j - 1)), 1, valor, i, j);
+				}
+				if ((i - 1) >= 0) {
+					nodo = resultado->agregarNodo(resultado->obtenerNodo((i - 1), j), 2, valor, i, j);
+				}
+			}
 		}
-		cout << endl;
 	}
+	resultado->mostrarLista();
+	string direccion;
+	cout << "Ingrese el nombre de el archivo a crear:";
+	cin >> direccion;
+	archivo.escribirArchivo(archivo.obFila(), archivo.obColumna(), resultado, direccion);
 		cout << endl;
 	}
 	else {
@@ -205,33 +236,63 @@ void ListaEnlazada::Resta(string nombre,string nombre2) {
 	}
 
 }
-void ListaEnlazada::Multiplicacion(string nombre,string nombre2) {
+void ListaEnlazada::Multiplicacion(string nombre, string nombre2) {
 	archivo archivo2;
 	archivo archivo;
-	int temporal = 0;
+	ListaEnlazada* lista = archivo.matriz_1(nombre);
+	ListaEnlazada* resultado = new ListaEnlazada();
+	ListaEnlazada* lista2 = archivo2.matriz_2(nombre2);
+	//bool bosa = archivo.obColumna() == archivo2.obFila();
+	//cout<< archivo.obColumna() <<" "<< archivo2.obFila();
 	if (archivo.matriz_1(nombre) == nullptr || archivo.matriz_2(nombre2) == nullptr)
 	{
 		cout << "\nNo Existen los archivos" << endl;
 		return;
 	}
-	ListaEnlazada* lista = archivo.matriz_1(nombre);
-	ListaEnlazada* lista2 = archivo2.matriz_2(nombre2);
-	cout << "-----MULTIPLICACION--------" << endl;
-	for (int i= 0; i < archivo.obFila(); i++) //i para las filas de la matriz resultante
-	{
-		for (int k= 0; k < archivo2.obColumna(); k++) // k para las columnas de la matriz resultante
+	else if (bosa) {
+		int temporal = 0;
+		lista = archivo.matriz_1(nombre);
+		 resultado = new ListaEnlazada();
+		lista2 = archivo2.matriz_2(nombre2);
+		cout << "-----MATRIZ A--------" << endl;
+		lista->mostrarLista();
+		cout << "-----MATRIZ B--------" << endl;
+		lista2->mostrarLista();
+		for (int i = 0; i < archivo.obFila(); i++) //i para las filas de la matriz resultante
 		{
-			for (int j = 0; j < archivo.obColumna(); j++) //j para realizar la multiplicacion de 
-			{                                   //los elementos   de la matriz
-				temporal =temporal+(lista->obtenerNodo(i, j)->numero * lista2->obtenerNodo(j, k)->numero);
+			for (int k = 0; k < archivo2.obColumna(); k++) // k para las columnas de la matriz resultante
+			{
+				for (int j = 0; j < archivo.obColumna(); j++) //j para realizar la multiplicacion de 
+				{                                   //los elementos   de la matriz
+					temporal = temporal + (lista->obtenerNodo(i, j)->numero * lista2->obtenerNodo(j, k)->numero);
+				}
+				Nodo* nodo = nullptr;
+				if (i == 0 && k == 0) {
+					nodo = resultado->raiz(temporal);
+				}
+				else {
+					if ((k - 1) >= 0) {
+						nodo = resultado->agregarNodo(resultado->obtenerNodo(i, (k - 1)), 1, temporal, i, k);
+					}
+					if ((i - 1) >= 0) {
+						nodo = resultado->agregarNodo(resultado->obtenerNodo((i - 1), k), 2, temporal, i, k);
+					}
+				}
+				temporal = 0;
+
 			}
-			cout << temporal << " ";
-			temporal = 0;
 		}
-		cout << endl;
-		}
+		cout << "-----MULTIPLICACION--------" << endl;
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirArchivo(archivo.obFila(), archivo.obColumna(), resultado, direccion);
 		cout << endl;
 	}
+	
+
+}
 
 
 
@@ -245,13 +306,40 @@ void ListaEnlazada::Determinante(string nombre) {
 	}
 	if (archivo.obFila()==1&&archivo.obColumna()==1)
 	{
+		ListaEnlazada* lista = archivo.matriz_1(nombre);
+		ListaEnlazada* resultado = new ListaEnlazada();
+		cout << "-----MATRIZ A--------" << endl;
 		archivo.imprimir(nombre);
+		cout << "-----DETERMINANTE ES--------" << endl;
+		Nodo* nodo = nullptr;
+		if (0 == 0 && 0 == 0) {
+			nodo = resultado->raiz(lista->obtenerNodo(0, 0)->numero);
+		}
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirDet(archivo.obFila(), archivo.obColumna(), resultado, direccion);
+		cout << endl;
+
+
 	}
 	else if (archivo.obFila() == 2 && archivo.obColumna() == 2) {
 		ListaEnlazada* lista = archivo.matriz_1(nombre);
+		ListaEnlazada* resultado = new ListaEnlazada();
 		int valor = lista->obtenerNodo(0, 0)->numero*lista->obtenerNodo(1, 1)->numero;
 		int valor2 = lista->obtenerNodo(0, 1)->numero * lista->obtenerNodo(1, 0)->numero;
-		cout << "Determinante es : " << (valor - valor2) << endl;
+		Nodo* nodo = nullptr;
+		if (0 == 0 && 0 == 0) {
+			nodo = resultado->raiz(valor-valor2);
+		}
+		cout << "-----DETERMINANTE ES --------" << endl;
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirDet(archivo.obFila(), archivo.obColumna(), resultado, direccion);
+		cout << endl;
 		
 	}else if (archivo.obFila() == 3 && archivo.obColumna() == 3) {
 		ListaEnlazada* lista = archivo.matriz_1(nombre);
@@ -259,15 +347,36 @@ void ListaEnlazada::Determinante(string nombre) {
 		pos = lista->obtenerNodo(0, 0)->numero * lista->obtenerNodo(1, 1)->numero * lista->obtenerNodo(2, 2)->numero + lista->obtenerNodo(1, 0)->numero * lista->obtenerNodo(2, 1)->numero * lista->obtenerNodo(0, 2)->numero + lista->obtenerNodo(0, 1)->numero * lista->obtenerNodo(1, 2)->numero * lista->obtenerNodo(2, 0)->numero;
 		neg = lista->obtenerNodo(0, 2)->numero * lista->obtenerNodo(1, 1)->numero * lista->obtenerNodo(2, 0)->numero + lista->obtenerNodo(1, 2)->numero * lista->obtenerNodo(2, 1)->numero * lista->obtenerNodo(0, 0)->numero + lista->obtenerNodo(0, 1)->numero * lista->obtenerNodo(1, 0)->numero * lista->obtenerNodo(2, 2)->numero;
 		det = pos - neg;
-		cout << "El determinante es: " << det << endl;
-
+		Nodo* nodo = nullptr;
+		ListaEnlazada* resultado = new ListaEnlazada();
+		if (0 == 0 && 0 == 0) {
+			nodo = resultado->raiz(det);
+		}
+		cout << "-----DETERMINANTE ES--------" << endl;
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirDet(archivo.obFila(), archivo.obColumna(), resultado, direccion);
+		cout << endl;
 	}
 	else if (archivo.obFila() >= 4 && archivo.obColumna() >=4)
 	{
 		cout << "-----MATRIZ A--------" << endl;
 		archivo.imprimir(nombre);
 		ListaEnlazada* lista = archivo.matriz_1(nombre);
-		cout << "El Determinante es: " << Det(lista, archivo.obFila(), nombre) << endl;
+		Nodo* nodo = nullptr;
+		ListaEnlazada* resultado = new ListaEnlazada();
+		if (0 == 0 && 0 == 0) {
+			nodo = resultado->raiz(Det(lista, archivo.obFila(), nombre));
+		}
+		cout << "-----DETERMINANTE ES--------" << endl;
+		resultado->mostrarLista();
+		string direccion;
+		cout << "Ingrese el nombre de el archivo a crear:";
+		cin >> direccion;
+		archivo.escribirDet(archivo.obFila(), archivo.obColumna(), resultado, direccion);
+		cout << endl;
 	}
 
 
@@ -296,4 +405,26 @@ int ListaEnlazada::Det(ListaEnlazada* lista2, int n, string nombre) {
 		}
 	}
 	return det;
+}
+void ListaEnlazada::mostrarLista() {
+	Nodo* aux1 = cabeza;
+	cout << aux1->numero << " ";
+	Nodo* nod = aux1->derecha;
+	do {
+		if (nod == nullptr)break;
+		cout<<nod->numero<<" ";
+		nod = nod->derecha;
+	} while (true);
+	cout << endl;
+	while ((aux1 = aux1->abajo) != nullptr) {
+		cout << aux1->numero << " ";
+		nod = aux1->derecha;
+		do {
+			if (nod == nullptr)break;
+			cout << nod->numero << " ";
+			nod = nod->derecha;
+		} while (true);
+		//            break;
+		cout << endl;
+	}
 }
