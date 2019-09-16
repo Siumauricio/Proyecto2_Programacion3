@@ -1,6 +1,7 @@
 #pragma once
 #include "Nodo.h"
-
+#ifndef LISTAENLAZADA_H
+#define LISTAENLAZADA_H
 class ListaEnlazada{
 private:
 	Nodo* obtener;
@@ -21,4 +22,6 @@ public:
 	void Determinante(string);
 	int Det(ListaEnlazada*,int , string);
 	void Menu();
+	void mostrarLista();
 };
+#endif // !LISTAENLAZADA_H
