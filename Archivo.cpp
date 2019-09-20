@@ -1,224 +1,293 @@
-#include "archivo.h"
-#include <fstream>
+#include <SFML/Graphics.hpp>
 #include <iostream>
-#include <sstream> 
-#include <string.h>
+#include <fstream>
+#include <sstream>
+#include "Menu.h"
+using namespace sf;
 using namespace std;
-#include <string>
-#include "ListaEnlazada.h"
-#include "nodo.h"
-using std::istringstream;
-void archivo::escribirDet(int fila, int columna, ListaEnlazada* ob, string nombre) {
-	ofstream lista(nombre, ios::app);
-	if (!lista)
+
+//tamano de pantalla
+int puntaje = 0;
+int N = 30, M = 20;
+int Tamano = 25;
+int pos = 150;
+//Tamano 
+int w = Tamano * N;
+int h = Tamano * M;
+bool arriba=true, abajo=true, derecha=true, izquierda=true;
+
+int dir, num = 4;
+
+//snake
+struct Snake
+{
+
+	int x, y;
+}  s[100];
+
+//comida
+struct Fruct
+{
+	int x, y;
+} f;
+
+struct Menu {
+	int pos[255];
+	int x;
+	int y;
+
+};
+void moverserpiente()
+{
+
+	//Union de piezas del snake
+	for (int i = num; i > 0; --i)
 	{
-		cout << "Error al intentar abrir archivo materias.dat";
-		return;
-	}else{
-		lista << ob->obtenerNodo(0, 0)->numero;
+		s[i].x = s[i - 1].x;
+		s[i].y = s[i - 1].y;
 	}
 
-}
-void archivo::escribirArchivo(int fila, int columna,ListaEnlazada*ob,string nombre) {
-	ofstream lista(nombre, ios::app);
-	if (!lista)
-	{
-		cout << "Error al intentar abrir archivo materias.dat";
-		return;
+	// Lee teclas presionadas validacion
+	if (dir == 0) {
+		s[0].y += 1;
 	}
-	for (int i = 0; i < fila; i++)
+	if (dir == 1) {
+		s[0].x -= 1;
+	}
+	if (dir == 2) {
+		s[0].x += 1;
+	}
+	if (dir == 3) {
+		s[0].y -= 1;
+	}
+
+	//tamano de snake cuando come comida
+	if ((s[0].x == f.x) && (s[0].y == f.y))
 	{
-		for (int j = 0; j< columna; j++)
+		//Funcion random para Comida
+		puntaje+=10;
+		num++;
+		f.x = rand() % N;
+		f.y = rand() % M;
+		cout << puntaje;
+	}
+
+
+	//Validacion entre paredes
+	if (s[0].x > N) s[0].x = 0;  if (s[0].x < 0) s[0].x = N;
+	if (s[0].y > M) s[0].y = 0;  if (s[0].y < 0) s[0].y = M;
+
+
+	// validacion de piezas que se remueven al tocarse el mismo
+
+}
+bool death(void)
+{
+	ofstream pun("puntaje.txt",ios::in);
+
+	for (int i = 1; i < num; i++)
+	{
+		if (s[0].x == s[i].x && s[0].y == s[i].y)
 		{
-				if (ob->obtenerNodo(i, j)->NodoD() == nullptr)
+			ifstream a("puntaje.txt", ios::in);
+			int puntos = 0;
+			while (a >> puntos) {
+				//cout <<"Puntaje"<< puntos;
+				if (puntaje > puntos)
 				{
-					lista << ob->obtenerNodo(i, j)->numero;
-					if ((i + 1) == fila)
-					{
-						break;
-					}
-					else {
-						lista << endl;
-					}
-				}
-				else {
-					lista << ob->obtenerNodo(i, j)->numero << " ";
+					pun << puntaje;
+					return true;
 				}
 			}
-	}
-}
-void archivo::leerArchivo() {
-	string cadena;
-	int Valor;
-	ifstream datos("matriz1.txt");
-	if (datos.fail()) {
-		cout << "Texto entrada Estructura.txt no existe" << endl;
-		return;
-	}
-	while (!datos.eof()) {
-		getline(datos, cadena);
-		istringstream in(cadena);
-		while (in >> Valor) {
-			cout << Valor << endl;
+			pun << puntaje;
+			return true;
 		}
 	}
+	return false;
 }
-ListaEnlazada* archivo::matriz_1(string nombre) {
-	ListaEnlazada* ob = new ListaEnlazada();
-	string cadena;
-	int n;
-	ifstream datos(nombre);
-	if (datos.fail()) {
-		cout << "El Archivo no Existe! " << endl;
-		return nullptr;
 
-	}
-	else {
-	
-		string line = "";
-		int f = 0, c = 0;
-		int filas = 0, columnas = 0;
-		bool sumaColumnas = false;
-		while (!datos.eof()) {
-			filas++;
-			getline(datos, cadena);
-			istringstream in(cadena);
-			while (in >> n) {
-				//cout << n << endl;
-				if (!sumaColumnas)columnas++;
-				Nodo* nodo = nullptr;
-				if (f == 0 && c == 0) {
-					nodo = ob->raiz(n);
-				}
-				else {
-					if ((c - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo(f, (c - 1)), 1, n, f, c);
-					}
-					if ((f - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo((f - 1), c), 2, n, f, c);
-					}
-				}
-				c++;
-			}
-			sumaColumnas = true;
-			f++;
-			c = 0;
-			asFila(filas);
-			asColumna(columnas);
-		}
-	}
-	
-	return ob;
-}
-ListaEnlazada* archivo::matriz_2(string nombre) {
-	ListaEnlazada* ob = new ListaEnlazada();
+int main()
+{
+	srand(time(0));
+	RenderWindow window(VideoMode(w, h), "Snake");
+	Texture t1, t2, t3, t4, t5, t6, t7, t8;
+	t1.loadFromFile("C:\\Users\\Mauricio\\Desktop\\J1.PNG");
+	t3.loadFromFile("C:\\Users\\Mauricio\\Desktop\\e1.PNG");
+	t4.loadFromFile("C:\\Users\\Mauricio\\Desktop\\s1.PNG");
+	t5.loadFromFile("C:\\Users\\Mauricio\\Desktop\\sn1.PNG");
+	t6.loadFromFile("C:\\Users\\Mauricio\\Desktop\\f1.PNG");
+	t7.loadFromFile("C:\\Users\\Mauricio\\Desktop\\c1.PNG");
+	t2.loadFromFile("C:\\Users\\Mauricio\\source\\repos\\Sna\\images\\green.png");
+	t8.loadFromFile("C:\\Users\\Mauricio\\Desktop\\g1.PNG");
+	//carga imagenes al sprite
+	Sprite sprite1(t1);
+	Sprite sprite2(t2);
+	Sprite sprite3(t3);
+	Sprite sprite4(t4);
+	Sprite sprite5(t5);
+	Sprite sprite6(t6);
+	Sprite sprite7(t7);
+	Sprite sprite8(t8);
+	//Sprite spritet9(puntaje);
 
-	string cadena;
-	int n;
-	ifstream datos(nombre);
-	if (datos.fail()) {
-		cout << "El Archivo no Existe! " << endl;
-		return  nullptr;
-	}
-	else {
-		string line = "";
-		int f = 0, c = 0;
-		int filas = 0, columnas = 0;
+	int score = 123456; // the score to print
 
-		bool sumaColumnas = false;
-		while (!datos.eof()) {
-			filas++;
-			getline(datos, cadena);
-			istringstream in(cadena);
-			while (in >> n) {
-				//cout << n << endl;
-				if (!sumaColumnas)columnas++;
-				Nodo* nodo = nullptr;
-				if (f == 0 && c == 0) {
-					nodo = ob->raiz(n);
-				}
-				else {
-					if ((c - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo(f, (c - 1)), 1, n, f, c);
-					}
-					if ((f - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo((f - 1), c), 2, n, f, c);
-					}
-				}
-				c++;
-			}
-			sumaColumnas = true;
-			f++;
-			c = 0;
-			asFila(filas);
-			asColumna(columnas);
-		}
-		cout << endl;
-	}
-	return ob;
-}
-void archivo::imprimir(string nombre) {
-	ListaEnlazada* ob = new ListaEnlazada();
+	sf::Text mytext;
+	std::stringstream ss;  // #include <sstream>
+	ss << score;
 
-	string cadena;
-	int n;
-	ifstream datos(nombre);
-	if (datos.fail()) {
-		cout << "El Archivo no Existe! " << endl;
-		return;
-	}
-	else {
-		string line = "";
-		int f = 0, c = 0;
-		int filas = 0, columnas = 0;
+	mytext.setString(ss.str().c_str());
 
-		bool sumaColumnas = false;
-		while (!datos.eof()) {
-			filas++;
-			getline(datos, cadena);
-			istringstream in(cadena);
-			while (in >> n) {
-				//cout << n << endl;
-				if (!sumaColumnas)columnas++;
-				Nodo* nodo = nullptr;
-				if (f == 0 && c == 0) {
-					nodo = ob->raiz(n);
-				}
-				else {
-					if ((c - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo(f, (c - 1)), 1, n, f, c);
-					}
-					if ((f - 1) >= 0) {
-						nodo = ob->agregarNodo(ob->obtenerNodo((f - 1), c), 2, n, f, c);
-					}
-				}
-				c++;
-			}
-			sumaColumnas = true;
-			f++;
-			c = 0;
-			asFila(filas);
-			asColumna(columnas);
-		}
-		for (int i = 0; i < filas; i++)
+
+
+	Clock clock;
+	float tiempo = 0, delay = 0.1;
+	//posicion de comida
+	f.x = 20;
+	f.y = 10;
+	//Ventana Abierta
+		while (window.isOpen())
 		{
-			for (int j = 0; j < columnas; j++) {
-				cout << ob->obtenerNodo(i, j)->numero << " ";
+			Event e;
+			while (window.pollEvent(e))
+			{
+				if (e.type == Event::Closed)
+					window.close();
+				sprite1.setPosition(275, 150);
+				sprite3.setPosition(270, 185);
+				sprite4.setPosition(260, 230);
+				sprite5.setPosition(250, 85);
+				//sprite6.setPosition(200, pos);
+
+				//std::cout << pos << " ";
+				window.draw(sprite5);
+				window.draw(sprite3);
+				window.draw(sprite4);
+				window.draw(sprite1);
+				window.display();
+				window.clear();
+				if (Keyboard::isKeyPressed(Keyboard::Down) && pos < 201) {
+					pos += 50;
+					sprite6.setPosition(200, pos);
+					window.draw(sprite6);
+				}
+				else if (Keyboard::isKeyPressed(Keyboard::Up) && pos > 150) {
+					pos -= 50;
+					sprite6.setPosition(200, pos);
+					window.draw(sprite6);
+				}
+				if (Keyboard::isKeyPressed(Keyboard::Space) && pos == 150)
+				{
+					RenderWindow window2(VideoMode(w, h), "Snakee");
+					window2.clear();
+					window.clear();
+					while (window2.isOpen())
+					{
+						float time = clock.getElapsedTime().asSeconds();
+						clock.restart();
+						tiempo += time;
+
+
+						Event e;//Creacion de eventos
+						Event o;
+
+						while (window2.pollEvent(o))
+						{
+							if (o.type == Event::Closed)
+								window2.close();
+						}
+						//Manejo de teclas.
+						if (Keyboard::isKeyPressed(Keyboard::Left) && izquierda) {
+							derecha = false;
+							abajo = true;
+							arriba = true;
+							dir = 1;
+						}
+						if (Keyboard::isKeyPressed(Keyboard::Right) && derecha) {
+							izquierda = false;
+							abajo = true;
+							arriba = true;
+							dir = 2;
+						}
+						if (Keyboard::isKeyPressed(Keyboard::Up) && arriba) {
+							izquierda = true;
+							derecha = true;
+							abajo = false;
+							dir = 3;
+						}
+						if (Keyboard::isKeyPressed(Keyboard::Down) && abajo) {
+							dir = 0;
+							derecha = true;
+							izquierda = true;
+							arriba = false;
+						}
+						if (Keyboard::isKeyPressed(Keyboard::Enter))
+						{
+							system("pause");
+						}
+						
+
+						//Andir movimiento
+						if (tiempo > delay) {
+
+							//movimiento snake
+							tiempo = 0;
+
+							window2.draw(mytext);
+							window2.display();
+
+							moverserpiente();
+
+							// algoritmo de movimiento
+							if (death())
+							{
+								//cout << "Moriste";
+								exit(EXIT_SUCCESS);
+								//Snake *n = new Snake();
+							}
+						}
+
+						window2.clear();
+
+
+						// Compilacion de juego 
+
+						for (int i = 0; i < num; i++)
+						{
+							if (s[i].x != s[i].y)
+							{
+
+							}
+							else {
+								break;
+							}
+						}
+						for (int i = 0; i < num; i++)
+						{
+							//Spawnear Serpiente
+							sprite8.setPosition(s[0].x*Tamano, s[0].y*Tamano);
+							
+							sprite2.setPosition(s[i].x*Tamano, s[i].y*Tamano);
+							window2.draw(sprite8);
+							window2.draw(sprite2);
+						}
+						//Spawnear la comida
+						sprite2.setPosition(f.x*Tamano, f.y*Tamano);  window2.draw(sprite2);
+						window2.display();
+						
+
+					}
+				}
+				if (Keyboard::isKeyPressed(Keyboard::Space) && pos == 200)
+				{
+					
+				}
+				if (Keyboard::isKeyPressed(Keyboard::Space) && pos == 250)
+				{
+					exit(EXIT_SUCCESS);
+				}
 			}
-			cout << endl;;
 		}
-		cout << endl;
 	}
-}
-void archivo::asFila(int valor) {
-	this->fila = valor;
-}
-void archivo::asColumna(int valor) {
-	this->columna = valor;
-}
-int archivo::obFila() {
-	return this->fila;
-}
-int archivo::obColumna() {
-	return this->columna;
-}
+
+	
